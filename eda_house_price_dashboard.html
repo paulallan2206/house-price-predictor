@@ -1,0 +1,713 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body, .dash { font-family: 'Syne', sans-serif; }
+
+  .dash {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    padding: 0;
+  }
+
+  .header {
+    padding: 20px 24px 16px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .header p {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 3px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 24px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    overflow-x: auto;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    transition: color 0.15s;
+  }
+
+  .tab.active {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-text-primary);
+  }
+
+  .panel { display: none; padding: 20px 24px; }
+  .panel.active { display: block; }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .kpi {
+    background: var(--color-background-secondary);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .kpi-label {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .kpi-value {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .kpi-sub {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .chart-box {
+    background: var(--color-background-secondary);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .chart-box.full { grid-column: 1 / -1; }
+
+  .chart-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 7px;
+  }
+
+  .bar-label {
+    font-size: 11px;
+    min-width: 80px;
+    color: var(--color-text-secondary);
+    font-family: 'DM Mono', monospace;
+    text-align: right;
+  }
+
+  .bar-label.wide { min-width: 110px; }
+
+  .bar-track {
+    flex: 1;
+    height: 20px;
+    background: var(--color-background-primary);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+
+  .bar-val {
+    font-size: 10px;
+    min-width: 56px;
+    font-family: 'DM Mono', monospace;
+    color: var(--color-text-secondary);
+    text-align: right;
+  }
+
+  .insight-box {
+    background: var(--color-background-secondary);
+    border-left: 3px solid var(--color-border-secondary);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    margin-top: 14px;
+  }
+
+  .insight-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--color-text-secondary);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 6px;
+  }
+
+  .insight-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .insight-list li {
+    font-size: 12px;
+    color: var(--color-text-primary);
+    padding-left: 12px;
+    position: relative;
+  }
+
+  .insight-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--color-text-secondary);
+    font-size: 10px;
+  }
+
+  .dot-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .dot-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--color-text-secondary);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .scatter-wrap {
+    position: relative;
+    width: 100%;
+    height: 180px;
+  }
+
+  .corr-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .corr-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .corr-val { font-size: 13px; font-weight: 600; }
+  .corr-label { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+
+  .heatmap-labels {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .heatmap-label {
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+</style>
+
+<div class="dash">
+  <div class="header">
+    <h1>Pakistan Real Estate — EDA Dashboard</h1>
+    <p>153 430 biens · 5 villes · Karachi · Lahore · Islamabad · Rawalpindi · Faisalabad</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('overview')">Vue d'ensemble</button>
+    <button class="tab" onclick="showTab('cities')">Par ville</button>
+    <button class="tab" onclick="showTab('types')">Types de biens</button>
+    <button class="tab" onclick="showTab('features')">Features & Corrélations</button>
+    <button class="tab" onclick="showTab('insights')">Insights ML</button>
+  </div>
+
+  <!-- TAB 1: OVERVIEW -->
+  <div class="panel active" id="tab-overview">
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Biens analysés</div>
+        <div class="kpi-value">153k</div>
+        <div class="kpi-sub">After cleaning</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Prix médian</div>
+        <div class="kpi-value">8.7M</div>
+        <div class="kpi-sub">PKR · For Sale</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Prix max</div>
+        <div class="kpi-value">2B</div>
+        <div class="kpi-sub">PKR · outliers</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Villes</div>
+        <div class="kpi-value">5</div>
+        <div class="kpi-sub">Marchés distincts</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-box">
+        <div class="chart-title">Distribution par ville</div>
+        <div id="city-dist"></div>
+        <div class="dot-row" style="margin-top:10px">
+          <div class="dot-item"><span class="dot" style="background:#3B82F6"></span>Karachi 36%</div>
+          <div class="dot-item"><span class="dot" style="background:#8B5CF6"></span>Lahore 25%</div>
+          <div class="dot-item"><span class="dot" style="background:#10B981"></span>Islamabad 22%</div>
+          <div class="dot-item"><span class="dot" style="background:#F59E0B"></span>Rawalpindi 12%</div>
+          <div class="dot-item"><span class="dot" style="background:#EF4444"></span>Faisalabad 5%</div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">Vente vs Location</div>
+        <div style="display:flex;gap:16px;align-items:center;height:140px">
+          <canvas id="purposeChart" width="140" height="140"></canvas>
+          <div style="flex:1">
+            <div style="margin-bottom:10px">
+              <div style="font-size:22px;font-weight:700">72%</div>
+              <div style="font-size:11px;color:var(--color-text-secondary);font-family:'DM Mono',monospace">For Sale · 110 247 biens</div>
+            </div>
+            <div>
+              <div style="font-size:22px;font-weight:700">28%</div>
+              <div style="font-size:11px;color:var(--color-text-secondary);font-family:'DM Mono',monospace">For Rent · 43 183 biens</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-box full">
+        <div class="chart-title">Prix médian par ville (PKR)</div>
+        <div id="city-price-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: CITIES -->
+  <div class="panel" id="tab-cities">
+    <div class="chart-grid">
+      <div class="chart-box full">
+        <div class="chart-title">Prix médian par ville · For Sale vs For Rent</div>
+        <div id="sale-rent-compare"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Surface médiane (Marla)</div>
+        <div id="area-bars"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Top quartiers (médiane prix)</div>
+        <div id="location-bars"></div>
+      </div>
+    </div>
+    <div class="insight-box">
+      <div class="insight-title">Observations clés</div>
+      <ul class="insight-list">
+        <li>Lahore = marché premium (médiane 16.5M PKR) malgré des surfaces similaires à Islamabad</li>
+        <li>Islamabad : écart médiane/moyenne énorme → forte présence de biens de luxe qui tirent la moyenne</li>
+        <li>DHA Defence est le quartier le plus cher et le plus représenté (20 932 biens, médiane 24.5M PKR)</li>
+        <li>Rawalpindi et Faisalabad : marchés accessibles, bon potentiel pour un modèle segmenté</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 3: TYPES -->
+  <div class="panel" id="tab-types">
+    <div class="chart-grid">
+      <div class="chart-box full">
+        <div class="chart-title">Prix médian par type de bien (PKR)</div>
+        <div id="type-price-bars"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Volume par type</div>
+        <div id="type-volume-bars"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Prix médian par nb de chambres · For Sale</div>
+        <div id="bedroom-bars"></div>
+      </div>
+    </div>
+    <div class="insight-box">
+      <div class="insight-title">Observations clés</div>
+      <ul class="insight-list">
+        <li>House = 63% du dataset → le modèle sera principalement entraîné sur ce type</li>
+        <li>Farm House : médiane 37.5M PKR mais seulement 626 biens → risque d'overfitting sur ce segment</li>
+        <li>Rooms & Lower/Upper Portions : prix très bas (15k–50k PKR) → probablement des locations mal taggées</li>
+        <li>Progression quasi-linéaire du prix avec le nombre de chambres (1→7 chambres)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 4: FEATURES -->
+  <div class="panel" id="tab-features">
+    <div class="chart-grid">
+      <div class="chart-box full">
+        <div class="chart-title">Matrice de corrélation avec le prix</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+          <div>
+            <div id="corr-bars"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;font-family:'DM Mono',monospace">INTERPRÉTATION</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="padding:10px;background:var(--color-background-primary);border-radius:6px;border:0.5px solid var(--color-border-tertiary)">
+                <div style="font-size:12px;font-weight:600">Bedrooms → Prix</div>
+                <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">r = 0.31 · corrélation modérée positive</div>
+              </div>
+              <div style="padding:10px;background:var(--color-background-primary);border-radius:6px;border:0.5px solid var(--color-border-tertiary)">
+                <div style="font-size:12px;font-weight:600">Baths → Prix</div>
+                <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">r = 0.22 · proxy de standing</div>
+              </div>
+              <div style="padding:10px;background:var(--color-background-primary);border-radius:6px;border:0.5px solid var(--color-border-tertiary)">
+                <div style="font-size:12px;font-weight:600">Area → Prix</div>
+                <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">r = 0.11 · surprenant ! La ville compte plus que la surface</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box full">
+        <div class="chart-title">Distribution des prix — quantiles</div>
+        <div id="quantile-viz"></div>
+      </div>
+    </div>
+    <div class="insight-box">
+      <div class="insight-title">Signal fort pour le modèle ML</div>
+      <ul class="insight-list">
+        <li>La corrélation faible entre surface et prix confirme que la localisation est la feature dominante</li>
+        <li>Bedrooms et baths sont très corrélés entre eux (r=0.66) → risque de multicolinéarité</li>
+        <li>Distribution très asymétrique → log-transformation du prix recommandée avant modélisation</li>
+        <li>50% des biens sous 8.7M PKR mais la moyenne à 18.4M → présence d'outliers extrêmes</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 5: INSIGHTS -->
+  <div class="panel" id="tab-insights">
+    <div class="chart-grid">
+      <div class="chart-box full">
+        <div class="chart-title">Recommandations pipeline ML</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px">
+          <div style="padding:14px;background:var(--color-background-primary);border-radius:8px;border:0.5px solid var(--color-border-tertiary)">
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">01 · Preprocessing</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:5px">
+              <li style="font-size:11px">→ log(price) comme target</li>
+              <li style="font-size:11px">→ Filtrer price > 0</li>
+              <li style="font-size:11px">→ Supprimer outliers > 99e percentile</li>
+              <li style="font-size:11px">→ Séparer vente / location</li>
+            </ul>
+          </div>
+          <div style="padding:14px;background:var(--color-background-primary);border-radius:8px;border:0.5px solid var(--color-border-tertiary)">
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">02 · Feature Engineering</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:5px">
+              <li style="font-size:11px">→ Encoder city (Target Encoding)</li>
+              <li style="font-size:11px">→ Encoder location (fréquence + prix médian)</li>
+              <li style="font-size:11px">→ price_per_marla = price / area</li>
+              <li style="font-size:11px">→ ratio baths/bedrooms</li>
+            </ul>
+          </div>
+          <div style="padding:14px;background:var(--color-background-primary);border-radius:8px;border:0.5px solid var(--color-border-tertiary)">
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">03 · Modèle</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:5px">
+              <li style="font-size:11px">→ XGBoost baseline</li>
+              <li style="font-size:11px">→ LightGBM (comparaison)</li>
+              <li style="font-size:11px">→ SHAP pour explicabilité</li>
+              <li style="font-size:11px">→ Validation croisée 5-fold</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Segments recommandés</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+          <div style="padding:10px 12px;background:var(--color-background-primary);border-radius:6px;border-left:3px solid #3B82F6">
+            <div style="font-size:11px;font-weight:600">Modèle principal</div>
+            <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;font-family:'DM Mono',monospace">House · For Sale · 3-5 chambres</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--color-background-primary);border-radius:6px;border-left:3px solid #8B5CF6">
+            <div style="font-size:11px;font-weight:600">Modèle appartements</div>
+            <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;font-family:'DM Mono',monospace">Flat · Penthouse · Karachi + Lahore</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--color-background-primary);border-radius:6px;border-left:3px solid #10B981">
+            <div style="font-size:11px;font-weight:600">Modèle location</div>
+            <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;font-family:'DM Mono',monospace">For Rent · Features temporelles</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Features les + prometteuses</div>
+        <div id="feature-importance-preview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const COLORS = {
+  karachi: '#3B82F6',
+  lahore: '#8B5CF6',
+  islamabad: '#10B981',
+  rawalpindi: '#F59E0B',
+  faisalabad: '#EF4444'
+};
+
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function makeBarRows(container, rows, maxVal, colorFn) {
+  rows.forEach(r => {
+    const pct = Math.round((r.val / maxVal) * 100);
+    container.innerHTML += `
+      <div class="bar-row">
+        <div class="bar-label ${r.wide ? 'wide' : ''}">${r.label}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;background:${colorFn(r)}"></div>
+        </div>
+        <div class="bar-val">${r.display}</div>
+      </div>`;
+  });
+}
+
+// City dist (donut-style bars)
+const cityDist = document.getElementById('city-dist');
+const distData = [
+  {label:'Karachi', val:54650, display:'54 650', color:COLORS.karachi},
+  {label:'Lahore', val:38492, display:'38 492', color:COLORS.lahore},
+  {label:'Islamabad', val:34456, display:'34 456', color:COLORS.islamabad},
+  {label:'Rawalpindi', val:18940, display:'18 940', color:COLORS.rawalpindi},
+  {label:'Faisalabad', val:6892, display:'6 892', color:COLORS.faisalabad},
+];
+makeBarRows(cityDist, distData, 54650, r => r.color);
+
+// Purpose donut
+const ctx = document.getElementById('purposeChart').getContext('2d');
+new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    datasets: [{
+      data: [72, 28],
+      backgroundColor: ['#3B82F6', '#E2E8F0'],
+      borderWidth: 0,
+      hoverOffset: 4
+    }]
+  },
+  options: {
+    cutout: '72%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    responsive: false
+  }
+});
+
+// City price bars
+const cpb = document.getElementById('city-price-bars');
+const cityPrices = [
+  {label:'Lahore', val:16500000, display:'16.5M PKR', color:COLORS.lahore},
+  {label:'Karachi', val:8500000, display:'8.5M PKR', color:COLORS.karachi},
+  {label:'Rawalpindi', val:4600000, display:'4.6M PKR', color:COLORS.rawalpindi},
+  {label:'Faisalabad', val:3500000, display:'3.5M PKR', color:COLORS.faisalabad},
+  {label:'Islamabad', val:250000, display:'250k PKR*', color:COLORS.islamabad},
+];
+makeBarRows(cpb, cityPrices, 16500000, r => r.color);
+cpb.innerHTML += `<div style="font-size:10px;color:var(--color-text-secondary);margin-top:6px;font-family:'DM Mono',monospace">*Islamabad médiane très basse car dominé par locations (DHA)</div>`;
+
+// Sale vs Rent compare
+const src = document.getElementById('sale-rent-compare');
+const srData = [
+  {label:'Lahore Sale', val:16500000, display:'16.5M', color:COLORS.lahore, wide:true},
+  {label:'Karachi Sale', val:8500000, display:'8.5M', color:COLORS.karachi, wide:true},
+  {label:'Rawalpindi Sale', val:4600000, display:'4.6M', color:COLORS.rawalpindi, wide:true},
+  {label:'Faisalabad Sale', val:3500000, display:'3.5M', color:COLORS.faisalabad, wide:true},
+  {label:'Lahore Rent', val:42000, display:'42k/mo', color:'#C4B5FD', wide:true},
+  {label:'Karachi Rent', val:35000, display:'35k/mo', color:'#93C5FD', wide:true},
+  {label:'Islamabad Rent', val:50000, display:'50k/mo', color:'#6EE7B7', wide:true},
+];
+makeBarRows(src, srData, 16500000, r => r.color);
+
+// Area bars
+const ab = document.getElementById('area-bars');
+const areaData = [
+  {label:'Islamabad', val:10, display:'10 Marla', color:COLORS.islamabad},
+  {label:'Lahore', val:10, display:'10 Marla', color:COLORS.lahore},
+  {label:'Rawalpindi', val:7, display:'7 Marla', color:COLORS.rawalpindi},
+  {label:'Karachi', val:6.4, display:'6.4 Marla', color:COLORS.karachi},
+  {label:'Faisalabad', val:5, display:'5 Marla', color:COLORS.faisalabad},
+];
+makeBarRows(ab, areaData, 10, r => r.color);
+
+// Location bars
+const lb = document.getElementById('location-bars');
+const locData = [
+  {label:'DHA Defence', val:24500000, display:'24.5M', color:'#6366F1', wide:true},
+  {label:'Bahria Town', val:16500000, display:'16.5M', color:'#8B5CF6', wide:true},
+  {label:'B.Town KHI', val:12000000, display:'12M', color:'#A78BFA', wide:true},
+  {label:'N.Nazimabad', val:9500000, display:'9.5M', color:'#C4B5FD', wide:true},
+  {label:'G-e-Iqbal', val:8500000, display:'8.5M', color:'#DDD6FE', wide:true},
+];
+makeBarRows(lb, locData, 24500000, r => r.color);
+
+// Type price bars
+const tpb = document.getElementById('type-price-bars');
+const typeData = [
+  {label:'Farm House', val:37500000, display:'37.5M PKR', color:'#EF4444', wide:true},
+  {label:'House', val:14000000, display:'14M PKR', color:'#3B82F6', wide:true},
+  {label:'Penthouse', val:7500000, display:'7.5M PKR', color:'#8B5CF6', wide:true},
+  {label:'Flat', val:5500000, display:'5.5M PKR', color:'#10B981', wide:true},
+  {label:'Upper Portion', val:50000, display:'50k PKR', color:'#F59E0B', wide:true},
+  {label:'Lower Portion', val:45000, display:'45k PKR', color:'#F97316', wide:true},
+  {label:'Room', val:15000, display:'15k PKR', color:'#94A3B8', wide:true},
+];
+makeBarRows(tpb, typeData, 37500000, r => r.color);
+
+// Type volume bars
+const tvb = document.getElementById('type-volume-bars');
+const typeVol = [
+  {label:'House', val:96643, display:'96 643', color:'#3B82F6', wide:true},
+  {label:'Flat', val:34309, display:'34 309', color:'#10B981', wide:true},
+  {label:'Upper P.', val:12515, display:'12 515', color:'#F59E0B', wide:true},
+  {label:'Lower P.', val:8293, display:'8 293', color:'#F97316', wide:true},
+  {label:'Room', val:663, display:'663', color:'#94A3B8', wide:true},
+];
+makeBarRows(tvb, typeVol, 96643, r => r.color);
+
+// Bedroom price bars
+const bdb = document.getElementById('bedroom-bars');
+const bedroomData = [
+  {label:'7 ch.', val:38000000, display:'38M PKR', color:'#EF4444'},
+  {label:'6 ch.', val:35000000, display:'35M PKR', color:'#F97316'},
+  {label:'5 ch.', val:27000000, display:'27M PKR', color:'#F59E0B'},
+  {label:'4 ch.', val:16900000, display:'16.9M PKR', color:'#10B981'},
+  {label:'3 ch.', val:11500000, display:'11.5M PKR', color:'#3B82F6'},
+  {label:'2 ch.', val:5500000, display:'5.5M PKR', color:'#8B5CF6'},
+  {label:'1 ch.', val:3500000, display:'3.5M PKR', color:'#94A3B8'},
+];
+makeBarRows(bdb, bedroomData, 38000000, r => r.color);
+
+// Correlation bars
+const corrb = document.getElementById('corr-bars');
+const corrData = [
+  {label:'bedrooms', val:0.307, display:'r = 0.307', color:'#3B82F6'},
+  {label:'baths', val:0.221, display:'r = 0.221', color:'#8B5CF6'},
+  {label:'Area_in_Marla', val:0.106, display:'r = 0.106', color:'#10B981'},
+];
+corrData.forEach(r => {
+  const pct = Math.round((r.val / 0.4) * 100);
+  corrb.innerHTML += `
+    <div class="bar-row">
+      <div class="bar-label wide">${r.label}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${r.color}"></div>
+      </div>
+      <div class="bar-val">${r.display}</div>
+    </div>`;
+});
+
+// Quantile viz
+const qv = document.getElementById('quantile-viz');
+const quantiles = [
+  {label:'P10', val:35000, display:'35k'},
+  {label:'P25', val:200000, display:'200k'},
+  {label:'P50', val:8700000, display:'8.7M'},
+  {label:'P75', val:20000000, display:'20M'},
+  {label:'P90', val:45000000, display:'45M'},
+  {label:'P95', val:67500000, display:'67.5M'},
+];
+const maxQ = 67500000;
+quantiles.forEach((q, i) => {
+  const pct = Math.round((q.val / maxQ) * 100);
+  const colors = ['#94A3B8','#64748B','#3B82F6','#8B5CF6','#EF4444','#DC2626'];
+  qv.innerHTML += `
+    <div class="bar-row">
+      <div class="bar-label">${q.label}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${colors[i]}"></div>
+      </div>
+      <div class="bar-val">${q.display}</div>
+    </div>`;
+});
+qv.innerHTML += `<div style="font-size:10px;color:var(--color-text-secondary);margin-top:8px;font-family:'DM Mono',monospace">→ Distribution très asymétrique : log-transform recommandée pour la target</div>`;
+
+// Feature importance preview
+const fip = document.getElementById('feature-importance-preview');
+const features = [
+  {label:'city', val:0.35, display:'~35%', color:'#3B82F6'},
+  {label:'location', val:0.28, display:'~28%', color:'#8B5CF6'},
+  {label:'bedrooms', val:0.15, display:'~15%', color:'#10B981'},
+  {label:'property_type', val:0.11, display:'~11%', color:'#F59E0B'},
+  {label:'baths', val:0.07, display:'~7%', color:'#94A3B8'},
+  {label:'area_marla', val:0.04, display:'~4%', color:'#CBD5E1'},
+];
+features.forEach(r => {
+  const pct = Math.round(r.val * 100);
+  fip.innerHTML += `
+    <div class="bar-row">
+      <div class="bar-label wide">${r.label}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${r.color}"></div>
+      </div>
+      <div class="bar-val">${r.display}</div>
+    </div>`;
+});
+fip.innerHTML += `<div style="font-size:10px;color:var(--color-text-secondary);margin-top:6px;font-family:'DM Mono',monospace">* Estimation avant modélisation · à valider avec SHAP</div>`;
+</script>
