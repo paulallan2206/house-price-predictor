@@ -184,7 +184,7 @@ streamlit run app.py
 
 **Paul Allan**
 - GitHub: [@paulallan2206](https://github.com/paulallan2206)
-- LinkedIn: *[your LinkedIn URL]*
+- LinkedIn: https://www.linkedin.com/in/paul-allan-junior-meye-sika-5a8b28254/
 
 ---
 
