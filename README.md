@@ -182,7 +182,7 @@ streamlit run app.py
 
 ## 👤 Author
 
-**Paul Allan**
+**Paul Allan Junior**
 - GitHub: [@paulallan2206](https://github.com/paulallan2206)
 - LinkedIn: https://www.linkedin.com/in/paul-allan-junior-meye-sika-5a8b28254/
 
